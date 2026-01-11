@@ -1,29 +1,57 @@
-import {
-  addMatch,
-  getMatchesBySeason
-} from "../services/match.service.js";
+import { getMatchesBySeason } from "../services/match.service.js";
 
-export function createMatchController(req, res) {
-  const { seasonId, teamA, teamB, matchType } = req.body;
+import { processCompletedMatch } from "../services/processCompletedMatch.service.js";
 
-  if (!seasonId || !teamA || !teamB || !matchType) {
-    return res.status(400).json({
-      error: "seasonId, teamA, teamB, matchType are required"
+export const completeMatch = async (req, res) => {
+  try {
+    const match = await processCompletedMatch(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: match,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to process completed match",
     });
   }
+};
 
-  if (!["LIMITED", "TEST"].includes(matchType)) {
-    return res.status(400).json({
-      error: "matchType must be LIMITED or TEST"
+/**
+ * Get completed matches by season
+ * GET /api/matches/season/:seasonId
+ */
+export const getMatchesBySeasonController = async (req, res) => {
+  try {
+    const { seasonId } = req.params;
+
+    const matches = await getMatchesBySeason(seasonId);
+
+    res.json({
+      success: true,
+      data: matches,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch matches",
     });
   }
+};
 
-  const match = addMatch({ seasonId, teamA, teamB, matchType });
-  res.status(201).json(match);
-}
+import Match from "../models/match.model.js";
 
-export function getMatchesBySeasonController(req, res) {
-  const { seasonId } = req.params;
-  const matches = getMatchesBySeason(seasonId);
-  res.json(matches);
-}
+export const getMatchById = async (req, res) => {
+  try {
+    const match = await Match.findById(req.params.matchId);
+    if (!match) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+    res.json(match);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch match" });
+  }
+};

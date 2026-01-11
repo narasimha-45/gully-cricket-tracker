@@ -6,7 +6,7 @@ import {
 
 const router = express.Router();
 
-router.post("/", createSeasonController);
 router.get("/", getSeasonsController);
+router.post("/", createSeasonController);
 
 export default router;

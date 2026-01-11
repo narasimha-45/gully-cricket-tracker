@@ -1,13 +1,9 @@
-import { createSeason } from "../models/season.model.js";
+import Season from "../models/season.model.js";
 
-const seasons = [];
+export const createSeason = async (seasonName) => {
+  return await Season.create({ seasonName });
+};
 
-export function addSeason(name) {
-  const season = createSeason(name);
-  seasons.push(season);
-  return season;
-}
-
-export function getAllSeasons() {
-  return seasons;
-}
+export const getAllSeasons = async () => {
+  return await Season.find().sort({ createdAt: -1 });
+};
