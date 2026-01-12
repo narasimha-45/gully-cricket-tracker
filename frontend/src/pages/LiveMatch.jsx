@@ -514,7 +514,7 @@ export default function LiveMatch() {
   const acknowledgeMatchResult = async () => {
     if (ackSubmitting) return; 
 
-    setAckSubmitting(true);
+    
     const payload = {
       seasonId: match.seasonId,
 
@@ -563,6 +563,7 @@ export default function LiveMatch() {
 
     saveMatch(updated); // local
     setMatch(updated);
+    setAckSubmitting(true);
   };
 
   const undoFromInningsPopup = () => {
