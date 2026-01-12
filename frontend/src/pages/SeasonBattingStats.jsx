@@ -41,7 +41,7 @@ export default function SeasonBattingStats() {
         <span style={center}>B</span>
         <span style={center}>4s</span>
         <span style={center}>6s</span>
-        <span style={center}>D</span>
+        <span style={center}>0s</span>
       </div>
 
       {/* ROWS */}

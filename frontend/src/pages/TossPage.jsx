@@ -87,14 +87,12 @@ export default function TossPage() {
         thisOver: [],
       },
 
-      
-
       updatedAt: Date.now(),
     };
 
     await saveMatch(updatedMatch);
 
-    navigate(`/season/${seasonId}/match/${matchId}/live`);
+    navigate(`/season/${seasonId}/match/${matchId}/live`, { replace: true });
   };
 
   return (
