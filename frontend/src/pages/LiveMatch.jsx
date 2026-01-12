@@ -957,7 +957,9 @@ export default function LiveMatch() {
         </div>
       )}
 
-      {match.status === "COMPLETED" && !match.ui?.matchResultSeen && (
+      {match.status === "COMPLETED" && 
+      // !match.ui?.matchResultSeen && 
+      (
         <div style={popup}>
           <div style={popupCard}>
             <h2>{match.result.winner} Won</h2>
