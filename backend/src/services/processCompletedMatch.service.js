@@ -39,7 +39,13 @@ export const processCompletedMatch = async (match) => {
     for (const key of ["teamA", "teamB"]) {
       const teamData = match.teams[key];
 
-      const playerIds = teamData.players.map((name) => playersMap[name]._id);
+      const playerIds = teamData.players.map((name) => {
+        const key = name.trim().toLowerCase();
+        if (!playersMap[key]) {
+          throw new Error(`Player not found in playersMap: ${name}`);
+        }
+        return playersMap[key]._id;
+      });
 
       await Team.findOneAndUpdate(
         { name: teamData.name, seasonId },
@@ -56,7 +62,12 @@ export const processCompletedMatch = async (match) => {
     for (const inning of match.innings) {
       /* -------- Batting -------- */
       for (const [name, stats] of Object.entries(inning.battingStats || {})) {
-        const player = playersMap[name];
+        const key = name.trim().toLowerCase();
+        const player = playersMap[key];
+
+        if (!player) {
+          throw new Error(`Batting player not found: ${name}`);
+        }
 
         const isOut = !!stats.dismissal;
         const isDuck = isOut && stats.runs === 0;
@@ -80,7 +91,12 @@ export const processCompletedMatch = async (match) => {
 
       /* -------- Bowling -------- */
       for (const [name, stats] of Object.entries(inning.bowlingStats || {})) {
-        const player = playersMap[name];
+        const key = name.trim().toLowerCase();
+        const player = playersMap[key];
+
+        if (!player) {
+          throw new Error(`Bowling player not found: ${name}`);
+        }
 
         await Player.updateOne(
           { _id: player._id },
