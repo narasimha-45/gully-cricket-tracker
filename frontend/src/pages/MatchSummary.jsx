@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { saveMatch } from "../storage/matchDB";
 
 export default function MatchSummary() {
   const { matchId } = useParams();
