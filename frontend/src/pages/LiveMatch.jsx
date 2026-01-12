@@ -20,12 +20,31 @@ export default function LiveMatch() {
   const [wicketUI, setWicketUI] = useState({
     open: false,
     type: null, // BOWLED | CAUGHT | RUN_OUT | STUMPED | ...
-    outWho: "STRIKER", // STRIKER | NON_STRIKER
     helper: null, // fielder / keeper
+
+    // Only used when type === "RUN_OUT"
+    runOut: {
+      outBatsman: null, // name of batsman
+      runs: 0, // runs completed
+    },
   });
 
   const [inningsEnd, setInningsEnd] = useState(false);
   const [matchEnd, setMatchEnd] = useState(false);
+
+  useEffect(() => {
+    if (!match || !match.seasonId) return;
+
+    const handlePopState = () => {
+      navigate(`/season/${match.seasonId}/matches`, { replace: true });
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [match, navigate]);
 
   const calcCRR = (runs, balls) =>
     balls === 0 ? "0.00" : (runs / (balls / 6)).toFixed(2);
@@ -327,7 +346,7 @@ export default function LiveMatch() {
     "SPECIAL",
   ];
 
-  const applyWicket = ({ wicketType, outBatsman, helper = null }) => {
+  const applyWicket = ({ wicketType, outBatsman, helper = null, runs = 0 }) => {
     if (match.status === "COMPLETED") return;
     const updated = deepCopy(match);
     const live = updated.live;
@@ -368,6 +387,7 @@ export default function LiveMatch() {
       outBatsman,
       helper,
       extra: extraMode,
+      runs: runs,
     });
 
     innings.battingStats[outBatsman] ||= {
@@ -377,6 +397,23 @@ export default function LiveMatch() {
       sixes: 0,
       dismissal: null,
     };
+
+    innings.totalRuns += runs;
+
+    if (extraMode === "NO_BALL" && match.rules?.noBall?.extraRun) {
+      innings.totalRuns += 1;
+    }
+    if (extraMode === "WIDE" && match.rules?.wide?.extraRun) {
+      innings.totalRuns += 1;
+    }
+
+    innings.battingStats[live.striker].runs += runs;
+
+    if (extraMode !== "WIDE") {
+      innings.battingStats[live.striker].balls += 1;
+    }
+
+    innings.bowlingStats[live.bowler].runs += runs;
 
     innings.battingStats[outBatsman].dismissal = {
       type: wicketType,
@@ -398,6 +435,13 @@ export default function LiveMatch() {
         maidens: 0,
       };
       innings.bowlingStats[live.bowler].wickets++;
+      innings.bowlingStats[live.bowler].runs += runs;
+      if (extraMode === "NO_BALL" && match.rules?.noBall?.extraRun) {
+        innings.bowlingStats[live.bowler].runs += 1;
+      }
+      if (extraMode === "WIDE" && match.rules?.wide?.extraRun) {
+        innings.bowlingStats[live.bowler].runs += 1;
+      }
     }
 
     innings.bowlingStats[live.bowler] ||= {
@@ -422,12 +466,11 @@ export default function LiveMatch() {
     };
 
     /* ---------- NEXT BATSMAN ---------- */
-    if (countsBall && innings.balls % 6 !== 0) {
-      if (outBatsman === live.striker) {
-        live.striker = null; // ✅ OUT striker replaced
-      } else if (outBatsman === live.nonStriker) {
-        live.nonStriker = null; // ✅ OUT non-striker replaced
-      }
+    // REMOVE BATSMAN REGARDLESS OF BALL COUNT
+    if (outBatsman === live.striker) {
+      live.striker = null;
+    } else if (outBatsman === live.nonStriker) {
+      live.nonStriker = null;
     }
 
     /* ---------- RESET EXTRA ---------- */
@@ -558,7 +601,10 @@ export default function LiveMatch() {
     });
 
     const updated = deepCopy(match);
-    updated.ui.matchResultSeen = true;
+    updated.ui = {
+      ...(updated.ui || {}),
+      matchResultSeen: true,
+    };
 
     saveMatch(updated); // local
     setMatch(updated);
@@ -1110,6 +1156,46 @@ export default function LiveMatch() {
             >
               ↺
             </button>
+
+            <button
+              style={keyBtn}
+              onClick={() => {
+                const updated = deepCopy(match);
+                const live = updated.live;
+                const innings = updated.innings[live.inningsIndex];
+
+                // FULL history snapshot (same as others)
+                live.history.push({
+                  type: "STRIKE_CHANGE",
+                  prevState: {
+                    striker: live.striker,
+                    nonStriker: live.nonStriker,
+                    bowler: live.bowler,
+                    lastOverBowler: live.lastOverBowler,
+                    balls: innings.balls,
+                    totalRuns: innings.totalRuns,
+                    wickets: innings.wickets,
+                    battingStats: deepCopy(innings.battingStats),
+                    bowlingStats: deepCopy(innings.bowlingStats),
+                    outBatsmen: [...live.outBatsmen],
+                    thisOver: deepCopy(innings.thisOver || []),
+                    extraMode,
+                  },
+                });
+
+                // swap strike
+                [live.striker, live.nonStriker] = [
+                  live.nonStriker,
+                  live.striker,
+                ];
+
+                updated.updatedAt = Date.now();
+                saveMatch(updated);
+                setMatch(updated);
+              }}
+            >
+              ⇄
+            </button>
           </div>
         </>
       )}
@@ -1176,15 +1262,46 @@ export default function LiveMatch() {
         {/* RUN OUT: WHO IS OUT */}
         {wicketUI.type === "RUN_OUT" && (
           <>
-            <h4>Who is out?</h4>
+            {/* WHO GOT RUN OUT */}
+            <h4>Who got run out?</h4>
+            {[live.striker, live.nonStriker].map((p) => (
+              <div
+                key={p}
+                style={
+                  wicketUI.runOut.outBatsman === p ? selectedListItem : listItem
+                }
+                onClick={() =>
+                  setWicketUI({
+                    ...wicketUI,
+                    runOut: {
+                      ...wicketUI.runOut,
+                      outBatsman: p,
+                    },
+                  })
+                }
+              >
+                {p}
+              </div>
+            ))}
+
+            {/* RUNS COMPLETED */}
+            <h4 style={{ marginTop: 12 }}>Runs completed</h4>
             <div style={grid2}>
-              {["STRIKER", "NON_STRIKER"].map((p) => (
+              {[0, 1, 2, 3, 4].map((r) => (
                 <button
-                  key={p}
-                  style={wicketUI.outWho === p ? activeBtn : btn}
-                  onClick={() => setWicketUI({ ...wicketUI, outWho: p })}
+                  key={r}
+                  style={wicketUI.runOut.runs === r ? activeBtn : btn}
+                  onClick={() =>
+                    setWicketUI({
+                      ...wicketUI,
+                      runOut: {
+                        ...wicketUI.runOut,
+                        runs: r,
+                      },
+                    })
+                  }
                 >
-                  {p.replace("_", " ")}
+                  {r}
                 </button>
               ))}
             </div>
@@ -1231,26 +1348,29 @@ export default function LiveMatch() {
           style={confirmBtn}
           disabled={
             !wicketUI.type ||
-            isInvalidWicket ||
-            (["CAUGHT", "RUN_OUT", "STUMPED"].includes(wicketUI.type) &&
-              !wicketUI.helper)
+            (wicketUI.type === "RUN_OUT" && !wicketUI.runOut.outBatsman)
           }
           onClick={() => {
             const outBatsman =
               wicketUI.type === "RUN_OUT"
-                ? wicketUI.outWho === "NON_STRIKER"
-                  ? live.nonStriker
-                  : live.striker
+                ? wicketUI.runOut.outBatsman
                 : live.striker;
+
             // console.log("Wicket", wicketUI);
 
             applyWicket({
               wicketType: wicketUI.type,
               outBatsman,
               helper: wicketUI.helper,
+              runs: wicketUI.type === "RUN_OUT" ? wicketUI.runOut.runs : 0,
             });
 
-            setWicketUI({ open: false });
+            setWicketUI({
+              open: false,
+              type: null,
+              helper: null,
+              runOut: { outBatsman: null, runs: 0 },
+            });
           }}
         >
           Confirm Wicket

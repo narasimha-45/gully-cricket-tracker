@@ -27,3 +27,18 @@ export async function updateMatch(match) {
     updatedAt: Date.now()
   });
 }
+
+
+export async function getMatchesBySeason(seasonId) {
+  const db = await dbPromise;
+  const all = await db.getAll("matches");
+  return all.filter((m) => m.seasonId === seasonId);
+}
+
+
+export async function deleteMatch(matchId) {
+  const db = await dbPromise;
+  await db.delete("matches", matchId);
+}
+
+
