@@ -9,7 +9,7 @@ export default function LiveMatch() {
   const { matchId } = useParams();
 
   const navigate = useNavigate();
-
+  const API = import.meta.env.VITE_API_BASE_URL;
   const [match, setMatch] = useState(null);
   const [sheet, setSheet] = useState(null); // striker | nonStriker | bowler
   const [editOpen, setEditOpen] = useState(false);
@@ -550,7 +550,7 @@ export default function LiveMatch() {
 
     // console.log("payload", payload);
 
-    await fetch("/api/matches/complete", {
+    await fetch(`${API}/api/matches/complete`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
