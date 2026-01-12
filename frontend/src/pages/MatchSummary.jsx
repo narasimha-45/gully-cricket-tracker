@@ -6,6 +6,7 @@ export default function MatchSummary() {
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_BASE_URL;
 
   const playAgain = async () => {
     const newMatchId = `match_${Date.now()}`;
@@ -48,7 +49,7 @@ export default function MatchSummary() {
   useEffect(() => {
     const loadMatch = async () => {
       try {
-        const res = await fetch(`/api/matches/${matchId}`);
+        const res = await fetch(`${API}/api/matches/${matchId}`);
         const data = await res.json();
         setMatch(data);
       } catch (err) {

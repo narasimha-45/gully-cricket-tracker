@@ -8,11 +8,12 @@ export default function CreateMatch() {
 
   /* ---------------- backend teams ---------------- */
   const [teams, setTeams] = useState([]);
+  const API = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const res = await fetch(`/api/teams?seasonId=${seasonId}`);
+        const res = await fetch(`${API}/api/teams?seasonId=${seasonId}`);
         const json = await res.json();
 
         setTeams(json.data || []);

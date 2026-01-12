@@ -5,11 +5,12 @@ export default function SeasonBowlingStats() {
   const { seasonId } = useParams();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const res = await fetch(`/api/stats/season/${seasonId}/bowling`);
+        const res = await fetch(`${API}/api/stats/season/${seasonId}/bowling`);
         const json = await res.json();
         setPlayers(json.data || []);
       } catch (err) {

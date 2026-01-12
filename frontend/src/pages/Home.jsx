@@ -8,10 +8,14 @@ export default function Home({ open, onClose }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+  // console.log(API)
+
   const loadSeasons = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/seasons");
+      const res = await fetch(`${API}/api/seasons`);
       if (!res.ok) throw new Error("Failed to fetch seasons");
 
       const data = await res.json();

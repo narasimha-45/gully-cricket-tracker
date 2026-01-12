@@ -7,11 +7,12 @@ export default function SeasonMatches() {
 
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const res = await fetch(`/api/matches/season/${seasonId}`);
+        const res = await fetch(`${API}/api/matches/season/${seasonId}`);
         const json = await res.json();
         setMatches(json.data || []);
       } catch (err) {
