@@ -512,7 +512,7 @@ export default function LiveMatch() {
   };
 
   const acknowledgeMatchResult = async () => {
-    // if (ackSubmitting) return;
+    if (ackSubmitting) return;
 
     const payload = {
       seasonId: match.seasonId,
