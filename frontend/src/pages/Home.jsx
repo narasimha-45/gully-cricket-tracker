@@ -15,6 +15,7 @@ export default function Home({ open, onClose }) {
       if (!res.ok) throw new Error("Failed to fetch seasons");
 
       const data = await res.json();
+      // console.log("seasons:",data)
       setSeasons(data || []);
     } catch (err) {
       console.error(err);
@@ -44,7 +45,17 @@ export default function Home({ open, onClose }) {
           <div
             key={season._id}
             className={styles.card}
-            onClick={() => navigate(`/season/${season._id}`)}
+            onClick={() => {
+              const stored = JSON.parse(
+                sessionStorage.getItem("seasons") || "{}"
+              );
+
+              stored[season._id] = season.seasonName;
+
+              sessionStorage.setItem("seasons", JSON.stringify(stored));
+
+              navigate(`/season/${season._id}`);
+            }}
           >
             <div className={styles.name}>{season.seasonName}</div>
             <div className={styles.meta}>{season.matchCount || 0} matches</div>

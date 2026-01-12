@@ -1,11 +1,21 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 import styles from "./SeasonLayout.module.css";
 
 export default function SeasonLayout() {
   const navigate = useNavigate();
+  const { seasonId } = useParams();
 
-  // later fetch from backend
-  const seasonName = "Sankranthi 2025";
+  // Read season name from sessionStorage using seasonId
+  const seasonName = (() => {
+    try {
+      const stored = JSON.parse(
+        sessionStorage.getItem("seasons") || "{}"
+      );
+      return stored[seasonId] || "Season";
+    } catch {
+      return "Season";
+    }
+  })();
 
   return (
     <div>
