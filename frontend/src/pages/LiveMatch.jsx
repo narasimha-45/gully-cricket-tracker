@@ -413,8 +413,6 @@ export default function LiveMatch() {
       innings.battingStats[live.striker].balls += 1;
     }
 
-    innings.bowlingStats[live.bowler].runs += runs;
-
     innings.battingStats[outBatsman].dismissal = {
       type: wicketType,
       bowler: live.bowler,
@@ -646,6 +644,40 @@ export default function LiveMatch() {
 
     return bestPlayer;
   }
+
+  const retireBatsman = (name) => {
+    if (!name || match.status === "COMPLETED") return;
+
+    const updated = deepCopy(match);
+    const live = updated.live;
+
+    // undo snapshot
+    live.history.push({
+      type: "RETIRED",
+      prevState: {
+        striker: live.striker,
+        nonStriker: live.nonStriker,
+        bowler: live.bowler,
+        lastOverBowler: live.lastOverBowler,
+        balls: innings.balls,
+        totalRuns: innings.totalRuns,
+        wickets: innings.wickets,
+        outBatsmen: [...live.outBatsmen],
+        battingStats: deepCopy(innings.battingStats),
+        bowlingStats: deepCopy(innings.bowlingStats),
+        thisOver: deepCopy(innings.thisOver || []),
+        extraMode,
+      },
+    });
+
+    // remove from crease
+    if (live.striker === name) live.striker = null;
+    if (live.nonStriker === name) live.nonStriker = null;
+
+    updated.updatedAt = Date.now();
+    saveMatch(updated);
+    setMatch(updated);
+  };
 
   const acknowledgeMatchResult = async () => {
     if (ackSubmitting) return;
@@ -1303,6 +1335,13 @@ export default function LiveMatch() {
               }}
             >
               ⇄
+            </button>
+            <button
+              style={keyBtn}
+              disabled={!live.striker}
+              onClick={() => retireBatsman(live.striker)}
+            >
+              Ret
             </button>
           </div>
         </>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "./CreateSeasonModal.module.css";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function CreateSeasonModal({ open, onClose, onCreated }) {
   const [name, setName] = useState("");
@@ -9,7 +10,7 @@ export default function CreateSeasonModal({ open, onClose, onCreated }) {
   const createSeason = async () => {
     if (!name.trim()) return;
 
-    await fetch("/api/seasons", {
+    await fetch(`${API}/api/seasons`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ seasonName: name })
