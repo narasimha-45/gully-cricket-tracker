@@ -124,7 +124,7 @@ export default function TeamAPlayers() {
       <button
         onClick={() =>
           navigate(
-            `/season/${seasonId}/match/${matchId}/setup/team-b`
+            `/season/${seasonId}/match/${matchId}/setup/team-b`,{ replace: true }
           )
         }
         style={nextBtn}

@@ -117,7 +117,7 @@ export default function TeamBPlayers() {
 
       {/* Next */}
       <button
-        onClick={() => navigate(`/season/${seasonId}/match/${matchId}/toss`)}
+        onClick={() => navigate(`/season/${seasonId}/match/${matchId}/toss`,{ replace: true })}
         style={nextBtn}
         disabled={players.length === 0}
       >

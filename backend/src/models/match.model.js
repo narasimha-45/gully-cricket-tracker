@@ -43,12 +43,23 @@ const MatchSchema = new mongoose.Schema(
     innings: mongoose.Schema.Types.Mixed,
 
     result: {
-      winner: String,
+      winner: {
+        type: String,
+        required: true,
+      },
       type: {
         type: String,
         enum: ["RUNS", "WICKETS"],
+        required: true,
       },
-      margin: Number,
+      margin: {
+        type: Number,
+        required: true,
+      },
+      manOfTheMatch: {
+        type: String, // player name
+        required: false, // older matches won’t have this
+      },
     },
 
     status: {
@@ -64,7 +75,6 @@ const MatchSchema = new mongoose.Schema(
 
 MatchSchema.index({ seasonId: 1, completedAt: -1 });
 
-const Match =
-  mongoose.models.Match || mongoose.model("Match", MatchSchema);
+const Match = mongoose.models.Match || mongoose.model("Match", MatchSchema);
 
 export default Match;

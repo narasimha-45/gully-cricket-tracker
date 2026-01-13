@@ -51,3 +51,34 @@ export const getSeasonBowlingStats = async (req, res) => {
     res.status(500).json({ success: false });
   }
 };
+
+
+export const getSeasonMiscStats = async (req, res) => {
+  try {
+    const { seasonId } = req.params;
+
+    const players = await Player.find({
+      seasonId
+    }).sort({
+        "misc.manOfTheMatch": -1,
+        "misc.catches": -1,
+        "misc.runOuts": -1,
+      })
+      .lean();
+
+    res.json({
+      success: true,
+      data: players.map((p) => ({
+        name: p.name,
+
+        catches: p.fielding?.catches || 0,
+        runOuts: p.fielding?.runOuts || 0,
+        mom: p.awards?.manOfTheMatch || 0,
+      })),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+};
+

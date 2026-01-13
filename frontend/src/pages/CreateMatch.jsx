@@ -85,7 +85,7 @@ export default function CreateMatch() {
 
     await saveMatch(match);
 
-    navigate(`/season/${seasonId}/match/${matchId}/setup/team-a`);
+    navigate(`/season/${seasonId}/match/${matchId}/setup/team-a`,{ replace: true });
   };
 
   return (

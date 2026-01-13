@@ -114,6 +114,71 @@ export const processCompletedMatch = async (match) => {
       }
     }
 
+    /* ------------------ 3.5 FIELDING (DERIVED) ------------------ */
+
+    const fieldingMap = {}; // { playerName: { catches, runOuts } }
+
+    for (const inning of match.innings) {
+      for (const dismissal of Object.values(inning.dismissals || {})) {
+        const { type, fielder } = dismissal;
+        if (!fielder) continue;
+
+        const key = fielder.trim().toLowerCase();
+
+        fieldingMap[key] ||= { catches: 0, runOuts: 0 };
+
+        if (type === "CAUGHT" || type === "STUMPED") {
+          fieldingMap[key].catches += 1;
+        }
+
+        if (type === "RUN_OUT") {
+          fieldingMap[key].runOuts += 1;
+        }
+      }
+    }
+
+    /* ------------------ 3.5 FIELDING STATS ------------------ */
+    for (const [key, stats] of Object.entries(fieldingMap)) {
+      const player = playersMap[key];
+
+      if (!player) {
+        throw new Error(`Fielding player not found: ${key}`);
+      }
+
+      await Player.updateOne(
+        { _id: player._id },
+        {
+          $inc: {
+            "misc.catches": stats.catches,
+            "misc.runOuts": stats.runOuts,
+          },
+        },
+        { session }
+      );
+    }
+
+    /* ------------------ 3.6 MAN OF THE MATCH ------------------ */
+    if (match.result?.manOfTheMatch) {
+      const momKey = match.result.manOfTheMatch.trim().toLowerCase();
+      const momPlayer = playersMap[momKey];
+
+      if (!momPlayer) {
+        throw new Error(
+          `Man of the Match player not found: ${match.result.manOfTheMatch}`
+        );
+      }
+
+      await Player.updateOne(
+        { _id: momPlayer._id },
+        {
+          $inc: {
+            "misc.mom": 1,
+          },
+        },
+        { session }
+      );
+    }
+
     /* ------------------ 4. SAVE MATCH ------------------ */
     const savedMatch = await Match.create(
       [

@@ -31,6 +31,15 @@ const PlayerSchema = new mongoose.Schema(
       wickets: { type: Number, default: 0 },
       maidens: { type: Number, default: 0 },
     },
+
+    /* 🧤 FIELDING STATS */
+    misc: {
+      catches: { type: Number, default: 0 },
+      runOuts: { type: Number, default: 0 },
+      mom: { type: Number, default: 0 },
+    },
+
+    /* 🏆 AWARDS / MISC */
   },
   { timestamps: true }
 );
@@ -41,9 +50,9 @@ PlayerSchema.index({ name: 1, seasonId: 1 }, { unique: true });
 PlayerSchema.index({ seasonId: 1 });
 PlayerSchema.index({ seasonId: 1, "batting.runs": -1 });
 PlayerSchema.index({ seasonId: 1, "bowling.wickets": -1 });
+PlayerSchema.index({ seasonId: 1, "fielding.catches": -1 });
+PlayerSchema.index({ seasonId: 1, "awards.manOfTheMatch": -1 });
 
-
-const Player =
-  mongoose.models.Player || mongoose.model("Player", PlayerSchema);
+const Player = mongoose.models.Player || mongoose.model("Player", PlayerSchema);
 
 export default Player;
