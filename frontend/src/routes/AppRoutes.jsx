@@ -18,6 +18,7 @@ import SelectStriker from "../pages/SelectStriker";
 import SeasonBattingStats from "../pages/SeasonBattingStats";
 import SeasonBowlingStats from "../pages/SeasonBowlingStats";
 import MatchSummary from "../pages/MatchSummary";
+import SeasonMiscStats from "../pages/SeasonMiscStats";
 
 export default function AppRoutes() {
   const [openCreateSeason, setOpenCreateSeason] = useState(false);
@@ -57,6 +58,7 @@ export default function AppRoutes() {
               <Route index element={<Navigate to="batting" replace />} />
               <Route path="batting" element={<SeasonBattingStats />} />
               <Route path="bowling" element={<SeasonBowlingStats />} />
+              <Route path="misc" element={<SeasonMiscStats />} /> {/* ✅ */}
             </Route>
           </Route>
         </Route>

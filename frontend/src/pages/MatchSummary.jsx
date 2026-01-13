@@ -73,6 +73,8 @@ export default function MatchSummary() {
 
   const { teams, toss, result, innings, totalOvers } = match;
 
+  const manOfTheMatch = result?.manOfTheMatch;
+
   const goBackToSeason = () => {
     navigate(`/season/${match.seasonId}/matches`);
   };
@@ -98,6 +100,12 @@ export default function MatchSummary() {
           <div style={resultText}>
             {result.winner} won by {result.margin}{" "}
             {result.type === "RUNS" ? "runs" : "wickets"}
+          </div>
+        )}
+
+        {manOfTheMatch && (
+          <div style={momBadge}>
+            ⭐ Man of the Match: <strong>{manOfTheMatch}</strong>
           </div>
         )}
       </div>
@@ -263,7 +271,6 @@ const backBtn = {
   cursor: "pointer",
   padding: 0,
 };
-
 
 const headerCard = {
   background: "#eef2ff",

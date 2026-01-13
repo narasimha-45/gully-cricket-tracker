@@ -23,6 +23,15 @@ export default function SeasonStats() {
         >
           Bowling
         </NavLink>
+
+        <NavLink
+          to="misc"
+          className={({ isActive }) =>
+            isActive ? styles.activeTab : styles.tab
+          }
+        >
+          Misc
+        </NavLink>
       </div>
 
       {/* Stats content */}
