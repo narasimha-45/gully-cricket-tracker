@@ -3,9 +3,13 @@ import { useParams } from "react-router-dom";
 
 export default function SeasonBowlingStats() {
   const { seasonId } = useParams();
+  const API = import.meta.env.VITE_API_BASE_URL;
+
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API = import.meta.env.VITE_API_BASE_URL;
+
+  const [sortKey, setSortKey] = useState("wickets");
+  const [sortDir, setSortDir] = useState("desc");
 
   useEffect(() => {
     const loadStats = async () => {
@@ -23,6 +27,90 @@ export default function SeasonBowlingStats() {
     loadStats();
   }, [seasonId]);
 
+  /* ---------- HELPERS ---------- */
+
+  const ballsToOvers = (balls = 0) => balls / 6;
+
+  const calcEco = (runs, balls) => {
+    if (!balls) return "0.00";
+    return (runs / ballsToOvers(balls)).toFixed(2);
+  };
+
+  const calcAvg = (runs, wickets) => {
+    if (!wickets) return "–";
+    return (runs / wickets).toFixed(2);
+  };
+
+  const getEco = (p) => {
+    if (!p.balls) return 0;
+    return p.runs / (p.balls / 6);
+  };
+
+  const getAvg = (p) => {
+    if (!p.wickets) return 0;
+    return p.runs / p.wickets;
+  };
+
+  /* ---------- SORT ---------- */
+
+  const sortedPlayers = [...players].sort((a, b) => {
+    let av = 0;
+    let bv = 0;
+
+    switch (sortKey) {
+      case "innings":
+        av = a.innings;
+        bv = b.innings;
+        break;
+      case "wickets":
+        av = a.wickets;
+        bv = b.wickets;
+        break;
+      case "runs":
+        av = a.runs;
+        bv = b.runs;
+        break;
+      case "balls":
+        av = a.balls;
+        bv = b.balls;
+        break;
+      case "eco":
+        av = getEco(a);
+        bv = getEco(b);
+        break;
+      case "avg":
+        av = getAvg(a);
+        bv = getAvg(b);
+        break;
+      default:
+        av = 0;
+        bv = 0;
+    }
+
+    return sortDir === "asc" ? av - bv : bv - av;
+  });
+
+  /* ---------- SORT HEADER ---------- */
+
+  const SortHeader = ({ label, col }) => (
+    <span
+      style={sortableHeader}
+      onClick={() => {
+        if (sortKey === col) {
+          setSortDir(sortDir === "asc" ? "desc" : "asc");
+        } else {
+          setSortKey(col);
+          setSortDir("desc");
+        }
+      }}
+    >
+      {label}
+      {sortKey === col && (sortDir === "asc" ? " ▲" : " ▼")}
+    </span>
+  );
+
+  /* ---------- UI ---------- */
+
   if (loading) {
     return (
       <p style={{ textAlign: "center", color: "#6b7280", marginTop: 40 }}>
@@ -36,24 +124,28 @@ export default function SeasonBowlingStats() {
       {/* HEADER */}
       <div style={{ ...rowBase, ...headerRow }}>
         <span style={playerHeader}>Player</span>
-        <span style={center}>I</span>
-        <span style={center}>W</span>
-        <span style={center}>R</span>
-        <span style={center}>B</span>
+        <SortHeader label="I" col="innings" />
+        <SortHeader label="W" col="wickets" />
+        <SortHeader label="R" col="runs" />
+        <SortHeader label="B" col="balls" />
+        <SortHeader label="Eco" col="eco" />
+        <SortHeader label="Avg" col="avg" />
       </div>
 
       {/* ROWS */}
-      {players.map((p) => (
+      {sortedPlayers.map((p) => (
         <div key={p._id} style={{ ...rowBase, ...dataRow }}>
           <span style={playerCell}>{p.name}</span>
           <span style={center}>{p.innings}</span>
           <span style={wickets}>{p.wickets}</span>
           <span style={center}>{p.runs}</span>
           <span style={center}>{p.balls}</span>
+          <span style={eco}>{calcEco(p.runs, p.balls)}</span>
+          <span style={avg}>{calcAvg(p.runs, p.wickets)}</span>
         </div>
       ))}
 
-      {players.length === 0 && (
+      {sortedPlayers.length === 0 && (
         <p style={emptyText}>No bowling data available</p>
       )}
     </div>
@@ -66,15 +158,13 @@ const page = {
   padding: 12,
 };
 
-/* SHARED GRID (CRITICAL) */
 const rowBase = {
   display: "grid",
-  gridTemplateColumns: "2.6fr repeat(4, 1fr)",
+  gridTemplateColumns: "2.6fr repeat(6, 1fr)",
   alignItems: "center",
   padding: "10px 12px",
 };
 
-/* HEADER */
 const headerRow = {
   fontSize: 12,
   fontWeight: 700,
@@ -83,7 +173,6 @@ const headerRow = {
   marginBottom: 8,
 };
 
-/* DATA ROW */
 const dataRow = {
   background: "#ffffff",
   borderRadius: 14,
@@ -92,7 +181,6 @@ const dataRow = {
   fontSize: 14,
 };
 
-/* CELLS */
 const playerHeader = {
   textAlign: "left",
 };
@@ -112,7 +200,25 @@ const center = {
 const wickets = {
   textAlign: "center",
   fontWeight: 800,
-  color: "#dc2626", // red for wickets
+  color: "#dc2626",
+};
+
+const eco = {
+  textAlign: "center",
+  fontWeight: 700,
+  color: "#1e40af",
+};
+
+const avg = {
+  textAlign: "center",
+  fontWeight: 700,
+  color: "#047857",
+};
+
+const sortableHeader = {
+  textAlign: "center",
+  cursor: "pointer",
+  userSelect: "none",
 };
 
 const emptyText = {

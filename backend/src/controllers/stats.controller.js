@@ -71,9 +71,9 @@ export const getSeasonMiscStats = async (req, res) => {
       data: players.map((p) => ({
         name: p.name,
 
-        catches: p.fielding?.catches || 0,
-        runOuts: p.fielding?.runOuts || 0,
-        mom: p.awards?.manOfTheMatch || 0,
+        catches: p.misc?.catches || 0,
+        runOuts: p.misc?.runOuts || 0,
+        mom: p.misc?.mom || 0,
       })),
     });
   } catch (err) {

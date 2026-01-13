@@ -5,7 +5,7 @@ import Match from "../models/match.model.js";
  */
 export const saveCompletedMatch = async (matchData) => {
   console.log("match data:", matchData)
-  return await Match.create({
+  return await Match.create({  
     ...matchData,
     status: "COMPLETED",
     completedAt: new Date(),
