@@ -93,6 +93,32 @@ export default function SeasonMatches() {
     (m) => m.status === "COMPLETED"
   );
 
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+
+    return d.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+  const ballsToOvers = (balls = 0) => {
+  const overs = Math.floor(balls / 6);
+  const ballsPart = balls % 6;
+  return `${overs}.${ballsPart}`;
+};
+
+  const getScoreLine = (inning) => {
+    if (!inning) return "";
+    return `${inning.totalRuns}-${inning.wickets} (${ballsToOvers(inning.balls)})`;
+  };
+
+  const isWinner = (teamName, match) => match.result?.winner === teamName;
+
   /* ---------------- UI ---------------- */
 
   return (
@@ -165,16 +191,73 @@ export default function SeasonMatches() {
                   style={card}
                   onClick={() => handleMatchClick(match, "SERVER")}
                 >
-                  <strong>
-                    {match.teams.teamA.name} vs {match.teams.teamB.name}
-                  </strong>
-
-                  {match.result && (
-                    <div style={resultText}>
-                      {match.result.winner} won by {match.result.margin}{" "}
-                      {match.result.type === "RUNS" ? "runs" : "wickets"}
+                  {/* DATE & TIME */}
+                  <div style={dateText}>
+                    {formatDateTime(match.startTime || match.createdAt)}
+                  </div>
+                  {/* TEAM A */}
+                  <div style={row}>
+                    <div
+                      style={{
+                        ...teamLeft,
+                        fontWeight: isWinner(
+                          match.innings[0].battingTeam,
+                          match
+                        )
+                          ? 600
+                          : 400,
+                      }}
+                    >
+                      {/* <span style={flag}></span> */}
+                      {match.innings[0].battingTeam}
                     </div>
-                  )}
+
+                    <div
+                      style={{
+                        ...score,
+                        fontWeight: isWinner(
+                          match.innings[1].battingTeam,
+                          match
+                        )
+                          ? 600
+                          : 400,
+                      }}
+                    >
+                      {getScoreLine(match.innings?.[0])}
+                    </div>
+                  </div>
+
+                  {/* TEAM B */}
+                  <div style={row}>
+                    <div
+                      style={{
+                        ...teamLeft,
+                        fontWeight: isWinner(match.innings[1].battingTeam, match)
+                          ? 600
+                          : 400,
+                      }}
+                    >
+                      {/* <span style={flag}>🇮🇳</span> */}
+                      {match.innings[1].battingTeam}
+                    </div>
+
+                    <div
+                      style={{
+                        ...score,
+                        fontWeight: isWinner(match.teams.teamB.name, match)
+                          ? 600
+                          : 400,
+                      }}
+                    >
+                      {getScoreLine(match.innings?.[1])}
+                    </div>
+                  </div>
+
+                  {/* RESULT */}
+                  <div style={resultLine}>
+                    {match.result.winner} won by {match.result.margin}{" "}
+                    {match.result.type === "RUNS" ? "runs" : "wkts"}
+                  </div>
                 </div>
               ))}
             </div>
@@ -186,6 +269,46 @@ export default function SeasonMatches() {
 }
 
 /* ---------------- STYLES ---------------- */
+
+const row = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "4px 0",
+};
+
+const teamLeft = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  fontSize: 14,
+};
+
+const flag = {
+  fontSize: 18,
+};
+
+const score = {
+  fontSize: 14,
+};
+
+const resultLine = {
+  marginTop: 6,
+  fontSize: 13,
+  color: "#2563eb", // blue like screenshot
+};
+
+const dateText = {
+  fontSize: 12,
+  color: "#6b7280",
+  marginBottom: 6,
+};
+
+const scoreText = {
+  fontSize: 13,
+  marginTop: 4,
+  fontWeight: 500,
+};
 
 const tabs = {
   display: "flex",

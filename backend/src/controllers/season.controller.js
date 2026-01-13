@@ -9,7 +9,7 @@ import Match from "../models/match.model.js";
 export const createSeasonController = async (req, res) => {
   try {
     const { seasonName } = req.body;
-
+    console.log(req)
     if (!seasonName) {
       return res.status(400).json({
         message: "seasonName is required"

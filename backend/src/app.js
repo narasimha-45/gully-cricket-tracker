@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/seasons", seasonRoutes);
+app.use("/api/seasons",seasonRoutes);
 app.use("/api/matches", matchRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/teams", teamRoutes);

@@ -72,6 +72,7 @@ export default function MatchSummary() {
   }
 
   const { teams, toss, result, innings, totalOvers } = match;
+  // console.log("Match",result,match)
 
   const manOfTheMatch = result?.manOfTheMatch;
 

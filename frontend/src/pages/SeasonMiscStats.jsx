@@ -27,47 +27,97 @@ export default function SeasonMiscStats() {
   }, [seasonId]);
 
   if (loading) {
-    return <p style={{ color: "#6b7280" }}>Loading misc stats…</p>;
+    return (
+      <p style={{ textAlign: "center", color: "#6b7280", marginTop: 40 }}>
+        Loading misc stats…
+      </p>
+    );
   }
 
   return (
-    <div>
+    <div style={page}>
       {/* HEADER */}
-      <div style={tableHeader}>
-        <span>Player</span>
-        <span>Catches</span>
-        <span>Run Outs</span>
-        <span>MoMs</span>
+      <div style={{ ...rowBase, ...headerRow }}>
+        <span style={playerHeader}>Player</span>
+        <span style={center}>C</span>
+        <span style={center}>RO</span>
+        <span style={center}>MoM</span>
       </div>
 
       {/* ROWS */}
       {players.map((p) => (
-        <div key={p._id} style={row}>
-          <span style={{ fontWeight: 600 }}>{p.name}</span>
-          <span>{p.misc?.catches || 0}</span>
-          <span>{p.misc?.runOuts || 0}</span>
-          <span>{p.misc?.mom || 0}</span>
+        <div key={p._id} style={{ ...rowBase, ...dataRow }}>
+          <span style={playerCell}>{p.name}</span>
+          <span style={center}>{p.catches || 0}</span>
+          <span style={center}>{p.runOuts || 0}</span>
+          <span style={mom}>{p.mom || 0}</span>
         </div>
       ))}
+
+      {players.length === 0 && (
+        <p style={emptyText}>No misc stats available</p>
+      )}
     </div>
   );
 }
 
-/* ---------------- STYLES ---------------- */
+/* ================= STYLES (MATCH BOWLING) ================= */
 
-const tableHeader = {
-  display: "grid",
-  gridTemplateColumns: "2fr repeat(3,1fr)",
-  fontSize: 12,
-  fontWeight: 600,
-  color: "#6b7280",
-  borderBottom: "1px solid #e5e7eb",
-  paddingBottom: 6,
+const page = {
+  padding: 12,
 };
 
-const row = {
+/* GRID */
+const rowBase = {
   display: "grid",
-  gridTemplateColumns: "2fr repeat(3,1fr)",
-  padding: "10px 0",
-  borderBottom: "1px solid #f1f5f9",
+  gridTemplateColumns: "2.6fr repeat(3, 1fr)", // Player + 3 stats
+  alignItems: "center",
+  padding: "10px 12px",
+};
+
+/* HEADER */
+const headerRow = {
+  fontSize: 12,
+  fontWeight: 700,
+  color: "#6b7280",
+  borderBottom: "1px solid #e5e7eb",
+  marginBottom: 8,
+};
+
+/* DATA ROW */
+const dataRow = {
+  background: "#ffffff",
+  borderRadius: 14,
+  marginBottom: 10,
+  boxShadow: "0 4px 10px rgba(0,0,0,0.04)",
+  fontSize: 14,
+};
+
+/* CELLS */
+const playerHeader = {
+  textAlign: "left",
+};
+
+const playerCell = {
+  fontWeight: 700,
+  color: "#111827",
+  textAlign: "left",
+};
+
+const center = {
+  textAlign: "center",
+  fontWeight: 600,
+  color: "#374151",
+};
+
+const mom = {
+  textAlign: "center",
+  fontWeight: 800,
+  color: "#4f46e5", // highlight MoM
+};
+
+const emptyText = {
+  textAlign: "center",
+  color: "#6b7280",
+  marginTop: 40,
 };

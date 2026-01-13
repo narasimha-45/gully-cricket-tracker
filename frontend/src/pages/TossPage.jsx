@@ -86,6 +86,8 @@ export default function TossPage() {
 
         thisOver: [],
       },
+      
+
 
       updatedAt: Date.now(),
     };
