@@ -260,7 +260,21 @@ function formatDismissal(d) {
   }
 }
 
+
+
 /* ---------------- STYLES ---------------- */
+
+const momBadge = {
+  display: "inline-block",
+  marginTop: 8,
+  padding: "4px 10px",
+  borderRadius: 999,
+  background: "#facc15", // gold
+  color: "#78350f",
+  fontSize: 12,
+  fontWeight: 700,
+};
+
 
 const backBtn = {
   alignSelf: "flex-start",
